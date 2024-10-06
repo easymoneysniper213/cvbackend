@@ -3,6 +3,7 @@ import os
 from langchain_openai import OpenAIEmbeddings
 from pinecone import Pinecone
 from dotenv import load_dotenv
+import math
 
 load_dotenv()
 
@@ -12,6 +13,10 @@ embedding_function = OpenAIEmbeddings(
 )
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 index = pc.Index("cv-vectorbase")
+
+def transform_score(score):
+    new_score = 10 * (0.8 * score + 0.2 * score ** 3)
+    return round(new_score, 2)
 
 def retrieve_from_pinecone(query_system, top_k=20):
     new_query = " ".join(query_system)
@@ -26,7 +31,8 @@ def retrieve_from_pinecone(query_system, top_k=20):
     for match in result['matches']:
         formatted_result = {
             'id': match['id'],
-            'metadata': match.get('metadata', {}) 
+            'metadata': match.get('metadata', {}),
+            'score': transform_score(match['score'])
         }
         formatted_results.append(formatted_result)
 
