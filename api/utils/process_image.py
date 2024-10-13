@@ -26,19 +26,28 @@ def image_summary(image_url, system):
     "model": "gpt-4o-mini",
     "messages": [
         {
-        "role": "user",
-        "content": [
-            {
-            "type": "text",
-            "text": f"The image is a system comprising of {system}, Give a description of this logical construct for this patent"
-            },
-            {
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{base64_image}"
-            }
-            }
-        ]
+            "role":"system",
+            "content": 
+                """
+                You will provided with an list of systems compositions and an image,
+                based on these, provide a detailed description of the diagram in using the system composition given
+                Just give the paragraph with the description, no other text is needed
+                """
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                "type": "text",
+                "text": f"System Composition: {system}"
+                },
+                {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                }
+            ]
         }
     ],
     "max_tokens": 300

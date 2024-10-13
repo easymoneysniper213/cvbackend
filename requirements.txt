@@ -5,3 +5,8 @@ langchain-community
 chromadb
 pinecone
 python-dotenv
+django
+djangorestframework
+django-cors-headers
+sentence-transformers
+tqdm

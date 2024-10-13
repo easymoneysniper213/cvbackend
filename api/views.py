@@ -6,23 +6,32 @@ from api.utils.process_image import image_summary
 from api.utils.process_response import produce_response
 from api.utils.process_claim import make_system_description
 from api.utils.process_claim import make_img_description
+from api.utils.find_matches import find_match
+import time
 
 @api_view(['POST'])
 def search_view(request):
     """
     Handles the search query and returns system compositions and search results.
     """
+    start_time = time.time()
+
     query = request.data.get('query', '')
     if not query:
         return Response({'error': 'No query provided'}, status=400)
     
     system_compositions = get_system_composition(query)
     search_results = retrieve_from_pinecone(system_compositions)
+    match_results = find_match(system_compositions, search_results)
+
+    execution_time = time.time() - start_time
 
     response_data = {
+        'match_results': match_results,
         'search_query': query,
         'system_compositions': system_compositions,
         'search_results': search_results,
+        'exec_time': execution_time
     }
 
     return Response(response_data)

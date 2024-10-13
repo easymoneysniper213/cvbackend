@@ -12,7 +12,22 @@ def get_system_composition(query):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "user", "content": f"{query} The above is an independent claim from a patent, give me a list of the system composition based on the text, just the list nothing else"}
+            {
+                "role": "system",
+                "content": 
+                    """
+                    You will recieve an independent claim from a patent, 
+                    based on this claim, create a system composition list that has the following structure
+                    - ...
+                    - ...
+                    - ...
+                    No other text other than this list is needed
+                    """
+            },
+            {
+                "role": "user", 
+                "content": query
+            }
         ]
     )
     content_message = response.choices[0].message.content

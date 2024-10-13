@@ -10,15 +10,46 @@ def produce_response(patent, pic_sum, patent_sum, pic_sys_comp, pat_sys_comp, in
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "user", "content": f"""
-             This patent {patent} has an independent claim {indp_clm}, and has system composition derived from this claim, 
-             which is: {pat_sys_comp}. Based on this information {patent_sum} was created, i would like you to now analyze the 
-             difference in summary and system composition before the patent mention above and my claim, which has a 
-             system composition: {pic_sys_comp} and summary {pic_sum}. Analyze these two and if the patent {patent} covers
-             all of the content mentioned in my summary and system composition, declare it could be a possible prior art.
-             prior art being defined as: references or documents which may be used to determine novelty and/or non-obviousness of claimed subject matter in a patent application 
-             Give me just the analysis and nothing else
-             """}
+            {
+                "role": "system",
+                "content": 
+                    """
+                    You task is to compare two different concepts for patents and determine whether A could be considered a prior art for B
+                    For A, you will get: Patent ID, an independent claim for a patent, a list of system composition, a concept summary
+                    For B, you will get: a list of system composition, a concept summary
+                    Based on the information for each, complete the task. Compare and give a response in the structure:
+
+                    - System Composition comparison
+                        - ...
+                        - ...
+                        - ...
+                    
+                    - Concept Summary comparison
+                        - ...
+                        - ...
+                        - ...
+                    
+                    - Conclusion
+                        Based on the analysis from above, A could be considered a prior art or no A couldn't be considered a prior art
+
+                    No other text other than this structure is needed
+                    """
+            },
+            {
+                "role": "user", 
+                "content": 
+                    f"""
+                    A:
+                    - Patent ID: {patent}
+                    - Independent claim: {indp_clm}
+                    - System Composition: {pat_sys_comp}
+                    - Summary: {patent_sum}
+
+                    B:
+                    - System Composition: {pic_sys_comp}
+                    - Summary: {pic_sum}
+                    """
+             }
         ]
     )
     final = response.choices[0].message.content
