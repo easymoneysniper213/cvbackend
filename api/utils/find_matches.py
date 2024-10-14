@@ -1,7 +1,6 @@
 from transformers import AutoTokenizer, AutoModel
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
 
 tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
 model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
@@ -25,10 +24,10 @@ def calculate_similarity(sentence1, sentence2):
 
     return similarity_score.item()
 
-def find_match(system_compositions, search_results, similarity_threshold=0.4):
+def find_match_composition(system_compositions, search_results, similarity_threshold=0.4):
     final_results = []
     
-    for result in tqdm(search_results):
+    for result in search_results:
         matches = []  
         used_components = set()  
 
@@ -52,3 +51,47 @@ def find_match(system_compositions, search_results, similarity_threshold=0.4):
         final_results.append(matches)
     
     return final_results
+
+
+def find_match_description(pic_list, patent_list, similarity_threshold=0.4):
+    matches = {}
+    used_items = set()  
+    
+    if len(pic_list) <= len(patent_list):
+        shorter_list = pic_list
+        longer_list = patent_list
+        is_pic_shorter = True  
+    else:
+        shorter_list = patent_list
+        longer_list = pic_list
+        is_pic_shorter = False
+
+    while len(shorter_list) < len(longer_list):
+        shorter_list.append("")  
+    
+    for short_item in shorter_list:
+        best_match = ""
+        best_similarity = 0
+        
+        for long_item in longer_list:
+            if long_item in used_items:
+                continue 
+            
+            similarity = calculate_similarity(short_item, long_item)
+            
+            if similarity > best_similarity and similarity >= similarity_threshold:
+                best_similarity = similarity
+                best_match = long_item
+
+        if best_match:
+            matches[short_item] = best_match
+            used_items.add(best_match)  
+        else:
+            matches[short_item] = ""  
+    
+    if is_pic_shorter:
+        pic_list = shorter_list
+    else:
+        patent_list = shorter_list
+    
+    return pic_list, patent_list

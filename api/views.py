@@ -6,7 +6,8 @@ from api.utils.process_image import image_summary
 from api.utils.process_response import produce_response
 from api.utils.process_claim import make_system_description
 from api.utils.process_claim import make_img_description
-from api.utils.find_matches import find_match
+from api.utils.find_matches import find_match_composition
+from api.utils.find_matches import find_match_description
 import time
 
 @api_view(['POST'])
@@ -22,7 +23,7 @@ def search_view(request):
     
     system_compositions = get_system_composition(query)
     search_results = retrieve_from_pinecone(system_compositions)
-    match_results = find_match(system_compositions, search_results)
+    match_results = find_match_composition(system_compositions, search_results)
 
     execution_time = time.time() - start_time
 
@@ -53,11 +54,21 @@ def details_comparison(request):
     if not patent_id or not system_components or not system_indp_claims_val:
         return Response({'error': 'Missing required fields'}, status=400)
     
-    pic_sum = make_system_description(system_indp_claims_val, pic)
+    pic_list = make_system_description(system_indp_claims_val, pic)
     img_sum = ''
     if images != []:
         img_sum = image_summary(images[0], system_components)
-    patent_sum = make_img_description(system_components, img_sum)
+    patent_list = make_img_description(system_components, img_sum)
+    new_pic_list, new_patent_list = find_match_description(pic_list, patent_list)
 
-    response = produce_response(patent_id, pic_sum, patent_sum, my_system_components, system_components, system_indp_claims_val)
-    return Response({'status': 'success', 'response': response, 'patent_sum': patent_sum, 'pic_sum': pic_sum})
+    response = produce_response(patent_id, pic_list, patent_list, my_system_components, system_components, system_indp_claims_val)
+
+    return Response({
+        'status': 'success', 
+        'response': response, 
+        'patent_sum': patent_list, 
+        'pic_sum': pic_list,
+        'patent_sum_2': new_patent_list,
+        'pic_sum_2': new_pic_list
+    })
+

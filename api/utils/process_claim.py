@@ -34,7 +34,9 @@ def make_system_description(system_comp, pic):
         ]
     )
     final = response.choices[0].message.content
-    return final
+    bullet_points = [line.strip().lstrip('*').strip() for line in final.split("\n") if line.strip()]
+    
+    return bullet_points
 
 def make_img_description(system_comp, img_sum):
     response = client.chat.completions.create(
@@ -64,4 +66,6 @@ def make_img_description(system_comp, img_sum):
         ]
     )
     final = response.choices[0].message.content
-    return final
+    bullet_points = [line.strip().lstrip('*').strip() for line in final.split("\n") if line.strip()]
+    
+    return bullet_points

@@ -6,7 +6,9 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI()
 
-def produce_response(patent, pic_sum, patent_sum, pic_sys_comp, pat_sys_comp, indp_clm):
+def produce_response(patent, pic_list, patent_list, pic_sys_comp, pat_sys_comp, indp_clm):
+    pic_list_str = "\n".join([f"- {item}" for item in pic_list])
+    patent_list_str = "\n".join([f"- {item}" for item in patent_list])
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -43,11 +45,11 @@ def produce_response(patent, pic_sum, patent_sum, pic_sys_comp, pat_sys_comp, in
                     - Patent ID: {patent}
                     - Independent claim: {indp_clm}
                     - System Composition: {pat_sys_comp}
-                    - Summary: {patent_sum}
+                    - Summary: {patent_list_str}
 
                     B:
                     - System Composition: {pic_sys_comp}
-                    - Summary: {pic_sum}
+                    - Summary: {pic_list_str}
                     """
              }
         ]

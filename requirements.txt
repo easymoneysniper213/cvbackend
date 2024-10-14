@@ -9,4 +9,3 @@ django
 djangorestframework
 django-cors-headers
 sentence-transformers
-tqdm

@@ -16,12 +16,14 @@ def get_system_composition(query):
                 "role": "system",
                 "content": 
                     """
-                    You will recieve an independent claim from a patent, 
-                    based on this claim, create a system composition list that has the following structure
+                    You will receive an independent claim from a patent. 
+                    Based on this claim, create a system composition list, 
+                    making sure to break the composition down into unique components
+                    it should be in the following structure:
                     - ...
                     - ...
                     - ...
-                    No other text other than this list is needed
+                    No other text other than this list is needed.
                     """
             },
             {
@@ -30,9 +32,11 @@ def get_system_composition(query):
             }
         ]
     )
+
     content_message = response.choices[0].message.content
     query_system_components = [
-        re.sub(r'^\d+\.\s*', '', item.strip()) 
+        re.sub(r'^[-\d)\.]+\s*', '', item.strip()) 
         for item in content_message.split("\n") if item.strip()
     ]
+
     return query_system_components
